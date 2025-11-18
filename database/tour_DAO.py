@@ -1,3 +1,5 @@
+from tkinter.tix import Select
+
 from database.DB_connect import DBConnect
 from model.tour import Tour
 
@@ -16,7 +18,7 @@ class TourDAO:
             return None
 
         cursor = cnx.cursor(dictionary=True)
-        query = """ ADD YOUR QUERY """ # TODO
+        query = "SELECT * FROM tour"
         try:
             cursor.execute(query)
             for row in cursor:
