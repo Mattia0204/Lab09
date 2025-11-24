@@ -68,6 +68,7 @@ class Model:
         costo_totale = 0.0
         for tour in self._pacchetto_ottimo:
             costo_totale += float(tour.costo)
+            tour.attrazioni = self.attrazioni_usate_set
         self._costo = costo_totale
 
         return self._pacchetto_ottimo, self._costo, self._valore_ottimo
@@ -78,6 +79,8 @@ class Model:
             if valore_corrente > self._valore_ottimo:
                 self._valore_ottimo = valore_corrente
                 self._pacchetto_ottimo = list(pacchetto_parziale)
+                self.attrazioni_usate_set = set(attrazioni_usate)
+                print(self.attrazioni_usate_set)
 
             return
 
@@ -109,13 +112,8 @@ class Model:
             new_used = set(attrazioni_usate)
             new_used.update(id_nuove_attrazioni)
 
-            # aggiornamento set leggibile delle attrazioni usate nel pacchetto ottimo
-            if valore_corrente + valore_aggiuntivo > self._valore_ottimo:
-                self.attrazioni_usate_set = set(new_used)
-                print(self.attrazioni_usate_set)
-
             # ricorsione sul candidato successivo
             self._ricorsione(index + 1, pacchetto_parziale, nuova_durata, nuovo_costo, valore_corrente + valore_aggiuntivo, new_used)
 
-            pacchetto_parziale.pop() #ss
+            pacchetto_parziale.pop()
         return
