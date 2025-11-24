@@ -68,7 +68,18 @@ class Model:
         costo_totale = 0.0
         for tour in self._pacchetto_ottimo:
             costo_totale += float(tour.costo)
-            tour.attrazioni = self.attrazioni_usate_set
+            tour_id = getattr(tour, "id", None)
+            if tour_id is not None:
+                attr_ids_this_tour = set(self._tour_attrazioni.get(tour_id, []))
+                attr_ids_effettive = attr_ids_this_tour.intersection(self.attrazioni_usate_set)
+                formattata = []
+                for aid in attr_ids_effettive:
+                    a = self.attrazioni_map.get(aid)
+                    if a is not None:
+                        formattata.append(f"{a.nome} ({a.valore_culturale})")
+                tour.attrazioni = formattata
+            else:
+                tour.attrazioni = []
         self._costo = costo_totale
 
         return self._pacchetto_ottimo, self._costo, self._valore_ottimo
@@ -80,8 +91,6 @@ class Model:
                 self._valore_ottimo = valore_corrente
                 self._pacchetto_ottimo = list(pacchetto_parziale)
                 self.attrazioni_usate_set = set(attrazioni_usate)
-                print(self.attrazioni_usate_set)
-
             return
 
         # ramo 1: salto il candidato
@@ -93,16 +102,17 @@ class Model:
         durata_aggiuntiva = int(tour_attributi.durata_giorni)
         costo_aggiuntivo = float(tour_attributi.costo)
 
-        valore_aggiuntivo = 0
-        id_nuove_attrazioni = []
-        id_attrazioni_tour = self._tour_attrazioni.get(tour_id, [])
-        for id_attrazione in id_attrazioni_tour:
-            if id_attrazione not in attrazioni_usate:
-                id_nuove_attrazioni.append(id_attrazione)
-                attributi_attrazione = self.attrazioni_map.get(id_attrazione)
-                if attributi_attrazione is not None:
-                    valore_aggiuntivo += int(attributi_attrazione.valore_culturale)
+        # prendo tutte le attrazioni di questo tour
+        id_attrazioni_tour = set(self._tour_attrazioni.get(tour_id, []))
 
+        if id_attrazioni_tour & attrazioni_usate:
+            return
+        id_nuove_attrazioni = list(id_attrazioni_tour)
+        valore_aggiuntivo = 0
+        for id_attrazione in id_nuove_attrazioni:
+            attributi_attrazione = self.attrazioni_map.get(id_attrazione)
+            if attributi_attrazione is not None:
+                valore_aggiuntivo += int(attributi_attrazione.valore_culturale)
 
         nuova_durata = durata_corrente + durata_aggiuntiva
         nuovo_costo = costo_corrente + costo_aggiuntivo
