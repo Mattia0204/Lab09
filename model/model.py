@@ -117,5 +117,5 @@ class Model:
             # ricorsione sul candidato successivo
             self._ricorsione(index + 1, pacchetto_parziale, nuova_durata, nuovo_costo, valore_corrente + valore_aggiuntivo, new_used)
 
-            pacchetto_parziale.pop()
+            pacchetto_parziale.pop() #ss
         return
